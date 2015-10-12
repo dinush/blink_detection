@@ -1,0 +1,45 @@
+import numpy as np
+import cv2
+
+DOWNSCALE = 1
+facecascade = cv2.CascadeClassifier('haar/haarcascade_frontalface_alt.xml')
+eyecascade = cv2.CascadeClassifier('haar/eye_tree.xml')
+
+cam = cv2.VideoCapture(0)
+cv2.namedWindow("preview")
+
+if cam.isOpened(): # try to get the first frame
+    rval, frame = cam.read()
+else:
+    rval = False
+
+while rval:
+    ret, img = cam.read()
+
+    minisize = (img.shape[1]/DOWNSCALE,img.shape[0]/DOWNSCALE)
+    img = cv2.resize(img, minisize)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    face = facecascade.detectMultiScale(gray, 1.3, 5)
+    for (x,y,w,h) in face:
+	print("x:", x, " y:", y, " w:", w, " h:", h)
+        img = img[x:x+w, y:y+h]
+        cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
+    gray2 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    if (len(face) > 0):
+        eyes = eyecascade.detectMultiScale(gray2, 1.1, 5)
+
+        print("no of eyes ", len(eyes))
+        for (x,y,w,h) in eyes:
+            #img = img[x:x+w, y:y+h]
+            cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
+
+
+    cv2.imshow('img',img)
+    cv2.waitKey(1)
+
+
+
+
+
